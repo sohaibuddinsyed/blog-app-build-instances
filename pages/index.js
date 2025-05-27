@@ -9,20 +9,20 @@ const imageProcessing = require('../utils/imageProcessing');
 export async function getStaticProps() {
   console.log('Starting massive data generation for build...');
   
-  // Generate a large dataset - this will consume significant memory
-  const products = dataGenerator.generateProducts(30000); // Increased to 30,000 products
+  // Generate an extremely large dataset - this will consume enormous memory
+  const products = dataGenerator.generateProducts(50000); // Increased to 50,000 products
   
   console.log(`Generated ${products.length} products`);
   
   // Process images for many products
-  const processedImages = await imageProcessing.processProductImages(products, 200); // Increased to 200
+  const processedImages = await imageProcessing.processProductImages(products, 500); // Increased to 500
   
   console.log(`Processed ${processedImages.length} product images`);
   
   // Generate galleries for many products
   const galleries = [];
-  for (let i = 0; i < 50; i++) { // Increased to 50 galleries
-    const gallery = await imageProcessing.generateProductGallery(i, 15); // Increased to 15 images per gallery
+  for (let i = 0; i < 100; i++) { // Increased to 100 galleries
+    const gallery = await imageProcessing.generateProductGallery(i, 25); // Increased to 25 images per gallery
     galleries.push(gallery);
     
     if (i % 10 === 0) {
@@ -32,7 +32,7 @@ export async function getStaticProps() {
   
   console.log(`Generated ${galleries.length} product galleries`);
   
-  // Filter products in memory-intensive ways
+  // Filter products in extremely memory-intensive ways
   console.log('Starting memory-intensive filtering operations...');
   
   // Create multiple filtered versions of the entire product catalog
@@ -71,7 +71,7 @@ export async function getStaticProps() {
   }
   
   // Filter by search terms
-  const searchTerms = ['product', 'special', 'new', 'premium', 'limited', 'exclusive', 'best', 'top'];
+  const searchTerms = ['product', 'special', 'new', 'premium', 'limited', 'exclusive', 'best', 'top', 'quality', 'value'];
   const filteredBySearches = {};
   for (const term of searchTerms) {
     filteredBySearches[term] = dataGenerator.filterProducts(products, { search: term });
@@ -86,9 +86,9 @@ export async function getStaticProps() {
   // Generate recommendations for many products
   console.log('Generating product recommendations...');
   const recommendations = {};
-  for (let i = 0; i < 300; i++) { // Increased to 300 products
+  for (let i = 0; i < 500; i++) { // Increased to 500 products
     if (products[i]) {
-      recommendations[i] = dataGenerator.getProductRecommendations(products[i], products, 20); // Increased to 20 recommendations
+      recommendations[i] = dataGenerator.getProductRecommendations(products[i], products, 50); // Increased to 50 recommendations
     }
     
     if (i % 50 === 0) {
@@ -128,32 +128,58 @@ export async function getStaticProps() {
       productCount: products.length,
       categoryStats,
       brandStats,
-      featuredProducts: products.slice(0, 50).map(p => ({ // Increased from 10 to 50
+      featuredProducts: products.slice(0, 100).map(p => ({ // Increased from 50 to 100
         id: p.id,
         name: p.name,
         price: p.price,
         category: p.category,
         brand: p.brand,
         rating: p.rating,
-        description: p.description.substring(0, 100)
+        description: p.description.substring(0, 200), // Increased from 100 to 200 chars
+        stock: p.stock,
+        tags: p.tags.slice(0, 15) // Added more tags
       })),
       popularCategories: categories.map(category => ({
         name: category,
-        count: filteredByCategories[category]?.length || 0
+        count: filteredByCategories[category]?.length || 0,
+        products: filteredByCategories[category]?.slice(0, 10).map(p => ({
+          id: p.id,
+          name: p.name,
+          price: p.price
+        })) || []
       })),
       popularBrands: brands.map(brand => ({
         name: brand,
-        count: filteredByBrands[brand]?.length || 0
+        count: filteredByBrands[brand]?.length || 0,
+        products: filteredByBrands[brand]?.slice(0, 10).map(p => ({
+          id: p.id,
+          name: p.name,
+          price: p.price
+        })) || []
       })),
       priceDistribution: priceRanges.map(range => ({
         range: `${range.min}-${range.max}`,
-        count: filteredByPrices[`${range.min}-${range.max}`]?.length || 0
+        count: filteredByPrices[`${range.min}-${range.max}`]?.length || 0,
+        products: filteredByPrices[`${range.min}-${range.max}`]?.slice(0, 10).map(p => ({
+          id: p.id,
+          name: p.name,
+          price: p.price
+        })) || []
+      })),
+      searchResults: searchTerms.map(term => ({
+        term,
+        count: filteredBySearches[term]?.length || 0,
+        products: filteredBySearches[term]?.slice(0, 5).map(p => ({
+          id: p.id,
+          name: p.name,
+          price: p.price
+        })) || []
       }))
     }
   };
 }
 
-export default function Home({ productCount, categoryStats, brandStats, featuredProducts, popularCategories, popularBrands, priceDistribution }) {
+export default function Home({ productCount, categoryStats, brandStats, featuredProducts, popularCategories, popularBrands, priceDistribution, searchResults }) {
   return (
     <div>
       <Head>
@@ -179,6 +205,8 @@ export default function Home({ productCount, categoryStats, brandStats, featured
               <li key={product.id}>
                 {product.name} - ${product.price} ({product.category}, {product.brand}) - Rating: {product.rating}/5
                 <p>{product.description}</p>
+                <p>Stock: {product.stock}</p>
+                <p>Tags: {product.tags?.join(', ')}</p>
               </li>
             ))}
           </ul>
@@ -189,7 +217,14 @@ export default function Home({ productCount, categoryStats, brandStats, featured
           <ul>
             {popularCategories.map(category => (
               <li key={category.name}>
-                {category.name} ({category.count} products)
+                <h3>{category.name} ({category.count} products)</h3>
+                <ul>
+                  {category.products.map(product => (
+                    <li key={product.id}>
+                      {product.name} - ${product.price}
+                    </li>
+                  ))}
+                </ul>
               </li>
             ))}
           </ul>
@@ -200,7 +235,14 @@ export default function Home({ productCount, categoryStats, brandStats, featured
           <ul>
             {popularBrands.map(brand => (
               <li key={brand.name}>
-                {brand.name} ({brand.count} products)
+                <h3>{brand.name} ({brand.count} products)</h3>
+                <ul>
+                  {brand.products.map(product => (
+                    <li key={product.id}>
+                      {product.name} - ${product.price}
+                    </li>
+                  ))}
+                </ul>
               </li>
             ))}
           </ul>
@@ -211,7 +253,32 @@ export default function Home({ productCount, categoryStats, brandStats, featured
           <ul>
             {priceDistribution.map(item => (
               <li key={item.range}>
-                ${item.range}: {item.count} products
+                <h3>${item.range}: {item.count} products</h3>
+                <ul>
+                  {item.products.map(product => (
+                    <li key={product.id}>
+                      {product.name} - ${product.price}
+                    </li>
+                  ))}
+                </ul>
+              </li>
+            ))}
+          </ul>
+        </div>
+        
+        <div>
+          <h2>Search Results</h2>
+          <ul>
+            {searchResults.map(result => (
+              <li key={result.term}>
+                <h3>"{result.term}": {result.count} products</h3>
+                <ul>
+                  {result.products.map(product => (
+                    <li key={product.id}>
+                      {product.name} - ${product.price}
+                    </li>
+                  ))}
+                </ul>
               </li>
             ))}
           </ul>

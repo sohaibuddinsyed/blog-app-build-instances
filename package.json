@@ -5,7 +5,7 @@
   "main": "index.js",
   "scripts": {
     "dev": "next dev",
-    "build": "NODE_OPTIONS='--max_old_space_size=9000' next build",
+    "build": "NODE_OPTIONS='--max_old_space_size=14000' next build",
     "start": "next start",
     "test": "jest",
     "test:watch": "jest --watch",

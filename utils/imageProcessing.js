@@ -23,40 +23,101 @@ const processProductImage = async (imageUrl, productId) => {
     
     const imageBuffer = Buffer.from(svgImage);
     
-    // Process the image with sharp (memory efficient version)
+    // Process the image with sharp (memory intensive)
     const processedImage = await sharp(imageBuffer)
-      .resize(1000, 750) // Reduced size from 4000x3000
-      .jpeg({ quality: 80 }) // Reduced quality from 100
+      .resize(width, height)
+      .jpeg({ quality: 100 })
       .toBuffer();
     
-    // Generate fewer sizes
+    // Generate multiple sizes (thumbnail, medium, large)
     const thumbnail = await sharp(processedImage)
-      .resize(400, 300) // Reduced from 800x600
-      .jpeg({ quality: 70 }) // Reduced quality from 90
+      .resize(800, 600)
+      .jpeg({ quality: 90 })
       .toBuffer();
       
-    // Apply only one filter to save memory
+    const medium = await sharp(processedImage)
+      .resize(2000, 1500)
+      .jpeg({ quality: 95 })
+      .toBuffer();
+      
+    // Apply filters (more memory usage)
     const grayscale = await sharp(processedImage)
       .grayscale()
-      .jpeg({ quality: 80 }) // Reduced quality from 95
+      .jpeg({ quality: 95 })
+      .toBuffer();
+      
+    const blurred = await sharp(processedImage)
+      .blur(5)
+      .jpeg({ quality: 95 })
+      .toBuffer();
+    
+    // Apply more filters to consume more memory
+    const sharpen = await sharp(processedImage)
+      .sharpen(5)
+      .jpeg({ quality: 95 })
+      .toBuffer();
+      
+    const contrast = await sharp(processedImage)
+      .modulate({ brightness: 1.2, saturation: 1.5, hue: 90 })
+      .jpeg({ quality: 95 })
+      .toBuffer();
+      
+    const tint = await sharp(processedImage)
+      .tint({ r: 255, g: 0, b: 0 })
+      .jpeg({ quality: 95 })
+      .toBuffer();
+      
+    const composite = await sharp(processedImage)
+      .composite([{ input: Buffer.from(svgImage), gravity: 'center' }])
+      .jpeg({ quality: 95 })
       .toBuffer();
     
     // Return metadata about the processed images
     return {
       original: {
-        width: 1000,
-        height: 750,
+        width,
+        height,
         size: processedImage.length
       },
       thumbnail: {
-        width: 400,
-        height: 300,
+        width: 800,
+        height: 600,
         size: thumbnail.length
       },
+      medium: {
+        width: 2000,
+        height: 1500,
+        size: medium.length
+      },
       grayscale: {
-        width: 1000,
-        height: 750,
+        width,
+        height,
         size: grayscale.length
+      },
+      blurred: {
+        width,
+        height,
+        size: blurred.length
+      },
+      sharpen: {
+        width,
+        height,
+        size: sharpen.length
+      },
+      contrast: {
+        width,
+        height,
+        size: contrast.length
+      },
+      tint: {
+        width,
+        height,
+        size: tint.length
+      },
+      composite: {
+        width,
+        height,
+        size: composite.length
       }
     };
   } catch (error) {
@@ -86,17 +147,17 @@ const processProductImages = async (products, limit = 1000) => {
   return results;
 };
 
-// Generate image gallery for a product - memory efficient version
-const generateProductGallery = async (productId, count = 5) => {
+// Generate image gallery for a product - memory intensive
+const generateProductGallery = async (productId, count = 100) => {
   console.time(`Gallery Generation for Product ${productId}`);
   
   const galleryImages = [];
   
-  // Generate fewer images with fewer effects
+  // Generate multiple images with different effects
   for (let i = 0; i < count; i++) {
     // Create a simple SVG as a valid image buffer
-    const width = 800; // Reduced from 4000
-    const height = 600; // Reduced from 3000
+    const width = 4000;
+    const height = 3000;
     const svgImage = `
       <svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">
         <rect width="100%" height="100%" fill="#f0f0f0"/>
@@ -106,30 +167,78 @@ const generateProductGallery = async (productId, count = 5) => {
     
     const imageBuffer = Buffer.from(svgImage);
     
-    // Apply only basic processing to save memory
+    // Apply different effects based on index
     let processedImage;
     
     try {
-      // Only use 3 effects instead of 10
-      switch (i % 3) {
+      switch (i % 10) {
         case 0:
           processedImage = await sharp(imageBuffer)
             .resize(width, height)
-            .jpeg({ quality: 80 }) // Reduced from 100
+            .jpeg({ quality: 100 })
             .toBuffer();
           break;
         case 1:
           processedImage = await sharp(imageBuffer)
             .resize(width, height)
             .grayscale()
-            .jpeg({ quality: 80 }) // Reduced from 95
+            .jpeg({ quality: 95 })
             .toBuffer();
           break;
         case 2:
           processedImage = await sharp(imageBuffer)
             .resize(width, height)
             .blur(3)
-            .jpeg({ quality: 80 }) // Reduced from 95
+            .jpeg({ quality: 95 })
+            .toBuffer();
+          break;
+        case 3:
+          processedImage = await sharp(imageBuffer)
+            .resize(width, height)
+            .sharpen()
+            .jpeg({ quality: 95 })
+            .toBuffer();
+          break;
+        case 4:
+          processedImage = await sharp(imageBuffer)
+            .resize(width, height)
+            .modulate({ brightness: 1.2 })
+            .jpeg({ quality: 95 })
+            .toBuffer();
+          break;
+        case 5:
+          processedImage = await sharp(imageBuffer)
+            .resize(width, height)
+            .tint({ r: 255, g: 0, b: 0 })
+            .jpeg({ quality: 95 })
+            .toBuffer();
+          break;
+        case 6:
+          processedImage = await sharp(imageBuffer)
+            .resize(width, height)
+            .modulate({ saturation: 2 })
+            .jpeg({ quality: 95 })
+            .toBuffer();
+          break;
+        case 7:
+          processedImage = await sharp(imageBuffer)
+            .resize(width, height)
+            .negate()
+            .jpeg({ quality: 95 })
+            .toBuffer();
+          break;
+        case 8:
+          processedImage = await sharp(imageBuffer)
+            .resize(width, height)
+            .modulate({ hue: 180 })
+            .jpeg({ quality: 95 })
+            .toBuffer();
+          break;
+        case 9:
+          processedImage = await sharp(imageBuffer)
+            .resize(width, height)
+            .composite([{ input: Buffer.from(svgImage), gravity: 'center' }])
+            .jpeg({ quality: 95 })
             .toBuffer();
           break;
       }

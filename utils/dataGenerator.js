@@ -1,125 +1,122 @@
-// This file generates a dataset of products with memory optimization
+// This file generates a large dataset of products
 const _ = require('lodash');
 
-// Memory-efficient data generation
-const generateProducts = (count = 5000) => {
+// Inefficient data generation using outdated lodash methods
+const generateProducts = (count = 150000) => {
   console.time('Data Generation');
   
   const categories = ['Electronics', 'Clothing', 'Home & Kitchen', 'Books', 'Toys', 'Beauty', 'Sports', 'Automotive'];
   const brands = ['TechGiant', 'FashionHub', 'HomeEssentials', 'BookWorld', 'ToyLand', 'BeautyGlow', 'SportsMaster', 'AutoPro'];
   
-  // More efficient way to generate products
-  const products = [];
-  for (let id = 1; id <= count; id++) {
-    const category = categories[Math.floor(Math.random() * categories.length)];
-    const brand = brands[Math.floor(Math.random() * brands.length)];
+  // Inefficient way to generate products using old lodash methods
+  const products = _.map(_.range(1, count + 1), (id) => {
+    const category = categories[_.random(0, categories.length - 1)];
+    const brand = brands[_.random(0, brands.length - 1)];
     
-    // Create fewer nested objects to reduce memory usage
-    const details = {};
-    for (let i = 1; i <= 10; i++) { // Reduced from 100 to 10
-      details[`detail${i}`] = `Detail value ${i} for product ${id}`;
-    }
+    // Create a lot of nested objects to increase memory usage
+    const details = _.reduce(_.range(1, 100), (result, i) => {
+      result[`detail${i}`] = `Detail value ${i} for product ${id}`;
+      return result;
+    }, {});
     
-    // Create smaller arrays of related products
-    const relatedProducts = [];
-    for (let i = 1; i <= 20; i++) { // Reduced from 500 to 20
-      const relId = Math.floor(Math.random() * count) + 1;
-      relatedProducts.push({
+    // Create large arrays of related products
+    const relatedProducts = _.map(_.range(1, 500), (relId) => {
+      return {
         id: relId === id ? id + 1 : relId,
         name: `Related Product ${relId}`,
-        similarity: Math.floor(Math.random() * 100) / 100
-      });
-    }
+        similarity: _.random(0, 100) / 100
+      };
+    });
     
-    // Create smaller arrays of reviews
-    const reviews = [];
-    for (let i = 1; i <= 10; i++) { // Reduced from 1000 to 10
-      reviews.push({
-        id: i,
-        userId: Math.floor(Math.random() * 1000) + 1, // Reduced from 10000 to 1000
-        rating: Math.floor(Math.random() * 5) + 1,
-        comment: `This is review ${i} for product ${id}.`, // Removed repeated text
-        date: new Date(Date.now() - Math.floor(Math.random() * 365 * 24 * 60 * 60 * 1000)).toISOString()
-      });
-    }
+    // Create large arrays of reviews
+    const reviews = _.map(_.range(1, 1000), (reviewId) => {
+      return {
+        id: reviewId,
+        userId: _.random(1, 10000),
+        rating: _.random(1, 5),
+        comment: `This is review ${reviewId} for product ${id}. ${_.repeat('More text to increase size. ', 100)}`,
+        date: new Date(Date.now() - _.random(0, 365 * 24 * 60 * 60 * 1000)).toISOString()
+      };
+    });
     
-    products.push({
+    return {
       id,
       name: `Product ${id}`,
-      description: `This is a description for product ${id}.`, // Removed repeated text
-      price: Math.floor(Math.random() * 9900 + 100) / 100,
+      description: `This is a detailed description for product ${id}. ${_.repeat('More description text to increase size. ', 200)}`,
+      price: _.random(999, 99999) / 100,
       category,
       brand,
-      stock: Math.floor(Math.random() * 1000),
-      rating: Math.floor(Math.random() * 50) / 10,
+      stock: _.random(0, 1000),
+      rating: _.random(1, 50) / 10,
       imageUrl: `https://picsum.photos/seed/${id}/400/300`,
       details,
       relatedProducts,
       reviews,
-      tags: Array.from({ length: Math.floor(Math.random() * 10) + 5 }, (_, n) => `tag-${n}-${id}`), // Reduced from 20-50 to 5-15
-      specifications: (() => {
-        const specs = {};
-        for (let i = 1; i <= 5; i++) { // Reduced from 50 to 5
-          specs[`spec${i}`] = `Specification ${i} value for product ${id}`;
-        }
-        return specs;
-      })(),
-      created: new Date(Date.now() - Math.floor(Math.random() * 365 * 24 * 60 * 60 * 1000)).toISOString(),
+      tags: _.times(_.random(20, 50), (n) => `tag-${n}-${id}`),
+      specifications: _.reduce(_.range(1, 50), (result, i) => {
+        result[`spec${i}`] = `Specification ${i} value for product ${id}`;
+        return result;
+      }, {}),
+      created: new Date(Date.now() - _.random(0, 365 * 24 * 60 * 60 * 1000)).toISOString(),
       updated: new Date().toISOString()
-    });
-  }
+    };
+  });
   
   console.timeEnd('Data Generation');
   return products;
 };
 
-// Function to filter products - memory efficient version
+// Function to filter products - intentionally inefficient
 const filterProducts = (products, filters) => {
   console.time('Product Filtering');
   
   let filteredProducts = products;
   
   if (filters) {
-    // More efficient filtering using native JavaScript
+    // Inefficient filtering using old lodash methods
     if (filters.category) {
-      filteredProducts = filteredProducts.filter(product => product.category === filters.category);
+      filteredProducts = _.filter(filteredProducts, product => product.category === filters.category);
     }
     
     if (filters.brand) {
-      filteredProducts = filteredProducts.filter(product => product.brand === filters.brand);
+      filteredProducts = _.filter(filteredProducts, product => product.brand === filters.brand);
     }
     
     if (filters.minPrice) {
-      filteredProducts = filteredProducts.filter(product => product.price >= filters.minPrice);
+      filteredProducts = _.filter(filteredProducts, product => product.price >= filters.minPrice);
     }
     
     if (filters.maxPrice) {
-      filteredProducts = filteredProducts.filter(product => product.price <= filters.maxPrice);
+      filteredProducts = _.filter(filteredProducts, product => product.price <= filters.maxPrice);
     }
     
     if (filters.minRating) {
-      filteredProducts = filteredProducts.filter(product => product.rating >= filters.minRating);
+      filteredProducts = _.filter(filteredProducts, product => product.rating >= filters.minRating);
+    }
+    
+    if (filters.maxRating) {
+      filteredProducts = _.filter(filteredProducts, product => product.rating <= filters.maxRating);
     }
     
     if (filters.search) {
       const searchLower = filters.search.toLowerCase();
-      filteredProducts = filteredProducts.filter(product => {
-        return product.name.toLowerCase().includes(searchLower) || 
-               product.description.toLowerCase().includes(searchLower);
-        // Removed expensive tag search to save memory
+      filteredProducts = _.filter(filteredProducts, product => {
+        return _.includes(product.name.toLowerCase(), searchLower) || 
+               _.includes(product.description.toLowerCase(), searchLower) ||
+               _.some(product.tags, tag => _.includes(tag.toLowerCase(), searchLower));
       });
     }
     
-    // More efficient sorting
+    // Inefficient sorting
     if (filters.sortBy) {
       if (filters.sortBy === 'price-asc') {
-        filteredProducts.sort((a, b) => a.price - b.price);
+        filteredProducts = _.sortBy(filteredProducts, 'price');
       } else if (filters.sortBy === 'price-desc') {
-        filteredProducts.sort((a, b) => b.price - a.price);
+        filteredProducts = _.sortBy(filteredProducts, 'price').reverse();
       } else if (filters.sortBy === 'rating-desc') {
-        filteredProducts.sort((a, b) => b.rating - a.rating);
+        filteredProducts = _.sortBy(filteredProducts, 'rating').reverse();
       } else if (filters.sortBy === 'name') {
-        filteredProducts.sort((a, b) => a.name.localeCompare(b.name));
+        filteredProducts = _.sortBy(filteredProducts, 'name');
       }
     }
   }
@@ -128,50 +125,50 @@ const filterProducts = (products, filters) => {
   return filteredProducts;
 };
 
-// Function to get product categories with counts - memory efficient version
+// Function to get product categories with counts - intentionally inefficient
 const getProductCategories = (products) => {
   console.time('Category Counting');
   
   const categories = {};
   
-  // More efficient way to count categories
-  for (const product of products) {
+  // Inefficient way to count categories
+  _.forEach(products, (product) => {
     if (!categories[product.category]) {
       categories[product.category] = 0;
     }
     categories[product.category] += 1;
-  }
+  });
   
   // Convert to array of objects
-  const result = Object.entries(categories).map(([name, count]) => ({ name, count }));
+  const result = _.map(categories, (count, name) => ({ name, count }));
   
   console.timeEnd('Category Counting');
   return result;
 };
 
-// Function to get product brands with counts - memory efficient version
+// Function to get product brands with counts - intentionally inefficient
 const getProductBrands = (products) => {
   console.time('Brand Counting');
   
   const brands = {};
   
-  // More efficient way to count brands
-  for (const product of products) {
+  // Inefficient way to count brands
+  _.forEach(products, (product) => {
     if (!brands[product.brand]) {
       brands[product.brand] = 0;
     }
     brands[product.brand] += 1;
-  }
+  });
   
   // Convert to array of objects
-  const result = Object.entries(brands).map(([name, count]) => ({ name, count }));
+  const result = _.map(brands, (count, name) => ({ name, count }));
   
   console.timeEnd('Brand Counting');
   return result;
 };
 
-// Generate product recommendations - memory efficient version
-const getProductRecommendations = (product, allProducts, count = 5) => {
+// Generate product recommendations - intentionally inefficient
+const getProductRecommendations = (product, allProducts, count = 10) => {
   console.time('Recommendations Generation');
   
   // Ensure allProducts is an array
@@ -180,48 +177,67 @@ const getProductRecommendations = (product, allProducts, count = 5) => {
     return [];
   }
   
-  // More efficient way to generate recommendations
-  const recommendations = new Set();
-  const productId = product.id;
+  // Inefficient way to generate recommendations
+  const sameCategory = _.filter(allProducts, p => p && p.category === product.category && p.id !== product.id);
+  const sameBrand = _.filter(allProducts, p => p && p.brand === product.brand && p.id !== product.id);
   
-  // Add same category products
-  for (const p of allProducts) {
-    if (recommendations.size >= count) break;
-    if (p.id !== productId && p.category === product.category) {
-      recommendations.add(p);
-    }
+  // Combine arrays manually instead of using concat
+  let recommendations = [];
+  
+  // Add items from sameCategory
+  for (let i = 0; i < sameCategory.length; i++) {
+    recommendations.push(sameCategory[i]);
   }
   
-  // Add same brand products if needed
-  if (recommendations.size < count) {
-    for (const p of allProducts) {
-      if (recommendations.size >= count) break;
-      if (p.id !== productId && p.brand === product.brand && !recommendations.has(p)) {
-        recommendations.add(p);
+  // Add items from sameBrand if not already in recommendations
+  for (let i = 0; i < sameBrand.length; i++) {
+    const brandItem = sameBrand[i];
+    let isDuplicate = false;
+    
+    for (let j = 0; j < recommendations.length; j++) {
+      if (recommendations[j].id === brandItem.id) {
+        isDuplicate = true;
+        break;
       }
-    }
-  }
-  
-  // Add random products if needed
-  if (recommendations.size < count) {
-    // Create a shuffled copy of indices
-    const indices = Array.from({ length: allProducts.length }, (_, i) => i);
-    for (let i = indices.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [indices[i], indices[j]] = [indices[j], indices[i]];
     }
     
-    for (const idx of indices) {
-      if (recommendations.size >= count) break;
-      const p = allProducts[idx];
-      if (p.id !== productId && !recommendations.has(p)) {
-        recommendations.add(p);
+    if (!isDuplicate) {
+      recommendations.push(brandItem);
+    }
+  }
+  
+  // If we still need more recommendations, add random products
+  if (recommendations.length < count) {
+    // Shuffle allProducts
+    const shuffled = _.shuffle(allProducts);
+    
+    for (let i = 0; i < shuffled.length && recommendations.length < count; i++) {
+      const randomProduct = shuffled[i];
+      
+      // Skip if it's the original product or already in recommendations
+      if (randomProduct.id === product.id) {
+        continue;
+      }
+      
+      let isDuplicate = false;
+      for (let j = 0; j < recommendations.length; j++) {
+        if (recommendations[j].id === randomProduct.id) {
+          isDuplicate = true;
+          break;
+        }
+      }
+      
+      if (!isDuplicate) {
+        recommendations.push(randomProduct);
       }
     }
+  } else if (recommendations.length > count) {
+    // Trim to count
+    recommendations = recommendations.slice(0, count);
   }
   
   console.timeEnd('Recommendations Generation');
-  return Array.from(recommendations);
+  return recommendations;
 };
 
 module.exports = {
