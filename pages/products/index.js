@@ -254,8 +254,8 @@ export async function getServerSideProps({ query }) {
     getProductBrands 
   } = require('../../utils/dataGenerator');
   
-  // Generate a large dataset
-  const allProducts = generateProducts(10000);
+  // Generate a smaller dataset to reduce memory usage
+  const allProducts = generateProducts(1000);
   
   // Get categories and brands
   const categories = getProductCategories(allProducts);

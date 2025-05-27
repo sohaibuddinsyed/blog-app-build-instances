@@ -5,18 +5,23 @@
   "main": "index.js",
   "scripts": {
     "dev": "next dev",
-    "build": "next build",
+    "build": "NODE_OPTIONS='--max_old_space_size=9000' next build",
     "start": "next start",
     "test": "jest",
     "test:watch": "jest --watch",
     "build:profile": "NODE_OPTIONS='--prof' next build",
-    "build:optimized": "NODE_OPTIONS='--max_old_space_size=4096' next build",
+    "build:optimized": "NODE_OPTIONS='--max_old_space_size=14000' next build",
     "test:optimized": "NODE_OPTIONS='--max_old_space_size=4096' jest"
   },
-  "keywords": ["nextjs", "performance", "optimization"],
+  "keywords": [
+    "nextjs",
+    "performance",
+    "optimization"
+  ],
   "author": "",
   "license": "ISC",
   "dependencies": {
+    "critters": "^0.0.25",
     "lodash": "3.10.1",
     "next": "^14.0.0",
     "react": "^18.2.0",
