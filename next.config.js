@@ -3,13 +3,15 @@ const nextConfig = {
   reactStrictMode: true,
   images: {
     domains: ['placeholder.com', 'picsum.photos'],
-    // Using larger image sizes to increase memory usage
-    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
-    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+    // Moderate image sizes
+    deviceSizes: [640, 750, 828, 1080, 1200],
+    imageSizes: [16, 32, 48, 64, 96],
+    // Limit concurrent image optimizations
+    minimumCacheTTL: 60,
   },
-  // Memory-intensive webpack configuration
+  // Webpack configuration with controlled memory usage
   webpack: (config) => {
-    // Configure webpack to use more memory
+    // Enable memory optimizations
     config.optimization = {
       ...config.optimization,
       minimize: true,
@@ -20,11 +22,11 @@ const nextConfig = {
       removeEmptyChunks: true,
       splitChunks: {
         chunks: 'all',
-        minSize: 10000, // Smaller chunk size to create more chunks
-        maxSize: 100000, // Smaller max size to create more chunks
+        minSize: 20000,
+        maxSize: 250000,
         minChunks: 1,
-        maxAsyncRequests: 60, // Increased from 30
-        maxInitialRequests: 60, // Increased from 30
+        maxAsyncRequests: 30,
+        maxInitialRequests: 30,
         automaticNameDelimiter: '~',
         cacheGroups: {
           defaultVendors: {
@@ -41,37 +43,44 @@ const nextConfig = {
       },
     };
     
-    // Increase parallel processing to use more memory
-    config.parallelism = 8; // Increased from 4
+    // Limit parallel processing
+    config.parallelism = 4;
     
     // Enable caching
     config.cache = true;
     
     return config;
   },
-  // Enable experimental features that might use more memory
+  // Disable experimental features that might cause memory issues
   experimental: {
-    optimizeCss: false, // Disable CSS optimization to avoid critters issues
+    optimizeCss: false,
     optimizeServerReact: true,
     optimizePackageImports: ['lodash'],
-    // Add more experimental features that might use memory
-    serverComponentsExternalPackages: [],
   },
-  // Enable source maps in production to use more memory
-  productionBrowserSourceMaps: true,
-  // Increase static page generation concurrency to use more memory
-  staticPageGenerationTimeout: 180, // Increased from 120
+  // Disable source maps in production
+  productionBrowserSourceMaps: false,
+  // Limit static page generation concurrency
+  staticPageGenerationTimeout: 120,
   // Compiler options
   compiler: {
-    // Keep console logs in production
-    removeConsole: false,
+    // Remove console logs in production
+    removeConsole: process.env.NODE_ENV === 'production' ? {
+      exclude: ['error', 'warn'],
+    } : false,
   },
-  // Increase the number of pages generated concurrently to use more memory
-  staticPageGenerationConcurrency: 8, // Increased from 3
+  // Limit concurrent page generation
+  staticPageGenerationConcurrency: 4,
   // Optimize output
   output: 'standalone',
   // Use SWC minifier
   swcMinify: true,
+  // Memory management
+  onDemandEntries: {
+    // period (in ms) where the server will keep pages in the buffer
+    maxInactiveAge: 25 * 1000,
+    // number of pages that should be kept simultaneously without being disposed
+    pagesBufferLength: 2,
+  },
 }
 
 module.exports = nextConfig

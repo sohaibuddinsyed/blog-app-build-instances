@@ -5,37 +5,36 @@ import Head from 'next/head';
 const dataGenerator = require('../utils/dataGenerator');
 const imageProcessing = require('../utils/imageProcessing');
 
-// Generate a massive amount of static pages at build time
+// Generate static pages at build time with controlled memory usage
 export async function getStaticProps() {
-  console.log('Starting massive data generation for build...');
+  console.log('Starting data generation for build...');
   
-  // Generate an extremely large dataset - this will consume enormous memory
-  const products = dataGenerator.generateProducts(50000); // Increased to 50,000 products
+  // Generate a dataset that will use significant memory but not crash with 14GB
+  const products = dataGenerator.generateProducts(15000); // 15,000 products
   
   console.log(`Generated ${products.length} products`);
   
-  // Process images for many products
-  const processedImages = await imageProcessing.processProductImages(products, 500); // Increased to 500
+  // Process images for a subset of products
+  const processedImages = await imageProcessing.processProductImages(products, 100);
   
   console.log(`Processed ${processedImages.length} product images`);
   
-  // Generate galleries for many products
+  // Generate galleries for a subset of products
   const galleries = [];
-  for (let i = 0; i < 100; i++) { // Increased to 100 galleries
-    const gallery = await imageProcessing.generateProductGallery(i, 25); // Increased to 25 images per gallery
+  for (let i = 0; i < 20; i++) {
+    const gallery = await imageProcessing.generateProductGallery(i, 10);
     galleries.push(gallery);
     
-    if (i % 10 === 0) {
+    if (i % 5 === 0) {
       console.log(`Generated ${i} product galleries`);
     }
   }
   
   console.log(`Generated ${galleries.length} product galleries`);
   
-  // Filter products in extremely memory-intensive ways
-  console.log('Starting memory-intensive filtering operations...');
+  // Filter products by category and brand
+  console.log('Starting filtering operations...');
   
-  // Create multiple filtered versions of the entire product catalog
   const categories = ['Electronics', 'Clothing', 'Home & Kitchen', 'Books', 'Toys', 'Beauty', 'Sports', 'Automotive'];
   const brands = ['TechGiant', 'FashionHub', 'HomeEssentials', 'BookWorld', 'ToyLand', 'BeautyGlow', 'SportsMaster', 'AutoPro'];
   
@@ -55,12 +54,9 @@ export async function getStaticProps() {
   
   // Filter by price ranges
   const priceRanges = [
-    { min: 0, max: 50 },
-    { min: 50, max: 100 },
-    { min: 100, max: 200 },
-    { min: 200, max: 500 },
-    { min: 500, max: 1000 },
-    { min: 1000, max: Number.MAX_SAFE_INTEGER }
+    { min: 0, max: 100 },
+    { min: 100, max: 500 },
+    { min: 500, max: Number.MAX_SAFE_INTEGER }
   ];
   
   const filteredByPrices = {};
@@ -70,79 +66,43 @@ export async function getStaticProps() {
     console.log(`Filtered ${filteredByPrices[key].length} products for price range ${key}`);
   }
   
-  // Filter by search terms
-  const searchTerms = ['product', 'special', 'new', 'premium', 'limited', 'exclusive', 'best', 'top', 'quality', 'value'];
-  const filteredBySearches = {};
-  for (const term of searchTerms) {
-    filteredBySearches[term] = dataGenerator.filterProducts(products, { search: term });
-    console.log(`Filtered ${filteredBySearches[term].length} products for search term "${term}"`);
-  }
-  
   // Get categories and brands with counts
   console.log('Generating category and brand statistics...');
   const categoryStats = dataGenerator.getProductCategories(products);
   const brandStats = dataGenerator.getProductBrands(products);
   
-  // Generate recommendations for many products
+  // Generate recommendations for a subset of products
   console.log('Generating product recommendations...');
   const recommendations = {};
-  for (let i = 0; i < 500; i++) { // Increased to 500 products
+  for (let i = 0; i < 50; i++) {
     if (products[i]) {
-      recommendations[i] = dataGenerator.getProductRecommendations(products[i], products, 50); // Increased to 50 recommendations
+      recommendations[i] = dataGenerator.getProductRecommendations(products[i], products, 10);
     }
     
-    if (i % 50 === 0) {
+    if (i % 10 === 0) {
       console.log(`Generated recommendations for ${i} products`);
     }
   }
   
-  // Create complex combinations of filters
-  console.log('Creating complex filter combinations...');
-  const complexFilters = [];
-  
-  for (const category of categories) {
-    for (const brand of brands) {
-      for (const range of priceRanges) {
-        const filtered = dataGenerator.filterProducts(products, {
-          category,
-          brand,
-          minPrice: range.min,
-          maxPrice: range.max
-        });
-        
-        complexFilters.push({
-          category,
-          brand,
-          priceRange: `${range.min}-${range.max}`,
-          count: filtered.length
-        });
-      }
-    }
-  }
-  
-  console.log(`Created ${complexFilters.length} complex filter combinations`);
-  
-  // Return only a subset of the data to avoid serialization issues
+  // Return data for the page
   return {
     props: {
       productCount: products.length,
       categoryStats,
       brandStats,
-      featuredProducts: products.slice(0, 100).map(p => ({ // Increased from 50 to 100
+      featuredProducts: products.slice(0, 20).map(p => ({
         id: p.id,
         name: p.name,
         price: p.price,
         category: p.category,
         brand: p.brand,
         rating: p.rating,
-        description: p.description.substring(0, 200), // Increased from 100 to 200 chars
-        stock: p.stock,
-        tags: p.tags.slice(0, 15) // Added more tags
+        description: p.description.substring(0, 100)
       })),
       popularCategories: categories.map(category => ({
         name: category,
         count: filteredByCategories[category]?.length || 0,
-        products: filteredByCategories[category]?.slice(0, 10).map(p => ({
+        products: filteredByCategories[category]?.slice(0, 5).map(p => ({
           id: p.id,
           name: p.name,
           price: p.price
@@ -151,7 +111,7 @@ export async function getStaticProps() {
       popularBrands: brands.map(brand => ({
         name: brand,
         count: filteredByBrands[brand]?.length || 0,
-        products: filteredByBrands[brand]?.slice(0, 10).map(p => ({
+        products: filteredByBrands[brand]?.slice(0, 5).map(p => ({
           id: p.id,
           name: p.name,
           price: p.price
@@ -160,16 +120,7 @@ export async function getStaticProps() {
       priceDistribution: priceRanges.map(range => ({
         range: `${range.min}-${range.max}`,
         count: filteredByPrices[`${range.min}-${range.max}`]?.length || 0,
-        products: filteredByPrices[`${range.min}-${range.max}`]?.slice(0, 10).map(p => ({
-          id: p.id,
-          name: p.name,
-          price: p.price
-        })) || []
-      })),
-      searchResults: searchTerms.map(term => ({
-        term,
-        count: filteredBySearches[term]?.length || 0,
-        products: filteredBySearches[term]?.slice(0, 5).map(p => ({
+        products: filteredByPrices[`${range.min}-${range.max}`]?.slice(0, 5).map(p => ({
           id: p.id,
           name: p.name,
           price: p.price
@@ -179,7 +130,7 @@ export async function getStaticProps() {
   };
 }
 
-export default function Home({ productCount, categoryStats, brandStats, featuredProducts, popularCategories, popularBrands, priceDistribution, searchResults }) {
+export default function Home({ productCount, categoryStats, brandStats, featuredProducts, popularCategories, popularBrands, priceDistribution }) {
   return (
     <div>
       <Head>
@@ -205,8 +156,6 @@ export default function Home({ productCount, categoryStats, brandStats, featured
               <li key={product.id}>
                 {product.name} - ${product.price} ({product.category}, {product.brand}) - Rating: {product.rating}/5
                 <p>{product.description}</p>
-                <p>Stock: {product.stock}</p>
-                <p>Tags: {product.tags?.join(', ')}</p>
               </li>
             ))}
           </ul>
@@ -256,24 +205,6 @@ export default function Home({ productCount, categoryStats, brandStats, featured
                 <h3>${item.range}: {item.count} products</h3>
                 <ul>
                   {item.products.map(product => (
-                    <li key={product.id}>
-                      {product.name} - ${product.price}
-                    </li>
-                  ))}
-                </ul>
-              </li>
-            ))}
-          </ul>
-        </div>
-        
-        <div>
-          <h2>Search Results</h2>
-          <ul>
-            {searchResults.map(result => (
-              <li key={result.term}>
-                <h3>"{result.term}": {result.count} products</h3>
-                <ul>
-                  {result.products.map(product => (
                     <li key={product.id}>
                       {product.name} - ${product.price}
                     </li>

@@ -5,12 +5,12 @@ import Head from 'next/head';
 const dataGenerator = require('../../utils/dataGenerator');
 const imageProcessing = require('../../utils/imageProcessing');
 
-// Generate paths for a massive number of products to increase memory usage
+// Generate paths for a controlled number of products
 export async function getStaticPaths() {
   console.log('Generating static paths for products...');
   
-  // Generate paths for 500 products to increase memory usage
-  const paths = Array.from({ length: 500 }, (_, i) => ({
+  // Generate paths for 100 products
+  const paths = Array.from({ length: 100 }, (_, i) => ({
     params: { id: String(i + 1) }
   }));
   
@@ -18,7 +18,7 @@ export async function getStaticPaths() {
   
   return {
     paths,
-    fallback: false // Force static generation of all pages
+    fallback: 'blocking' // Use blocking fallback for better UX
   };
 }
 
@@ -28,8 +28,8 @@ export async function getStaticProps({ params }) {
   
   const productId = parseInt(params.id, 10);
   
-  // Generate a larger dataset to increase memory usage
-  const allProducts = dataGenerator.generateProducts(20000); // Increased to 20,000 products
+  // Generate a dataset with controlled size
+  const allProducts = dataGenerator.generateProducts(5000);
   
   // Find the product by ID
   const product = allProducts.find(p => p.id === productId);
@@ -41,50 +41,22 @@ export async function getStaticProps({ params }) {
     };
   }
   
-  // Process product images (memory intensive)
+  // Process product image
   const processedImage = await imageProcessing.processProductImage(product.imageUrl, product.id);
   
-  // Generate product gallery (memory intensive)
-  const gallery = await imageProcessing.generateProductGallery(product.id, 30); // Increased from 20 to 30
+  // Generate product gallery
+  const gallery = await imageProcessing.generateProductGallery(product.id, 8);
   
-  // Get a larger number of related products
-  const relatedProducts = dataGenerator.getProductRecommendations(product, allProducts, 50); // Increased from 30 to 50
+  // Get related products
+  const relatedProducts = dataGenerator.getProductRecommendations(product, allProducts, 10);
   
-  // Filter products by same category (memory intensive)
-  const sameCategory = dataGenerator.filterProducts(allProducts, { category: product.category });
+  // Filter products by same category
+  const sameCategory = dataGenerator.filterProducts(allProducts, { category: product.category }).slice(0, 10);
   
-  // Filter products by same brand (memory intensive)
-  const sameBrand = dataGenerator.filterProducts(allProducts, { brand: product.brand });
+  // Filter products by same brand
+  const sameBrand = dataGenerator.filterProducts(allProducts, { brand: product.brand }).slice(0, 10);
   
-  // Filter products by similar price range (memory intensive)
-  const similarPrice = dataGenerator.filterProducts(allProducts, { 
-    minPrice: product.price * 0.8, 
-    maxPrice: product.price * 1.2 
-  });
-  
-  // Filter products by similar rating (memory intensive)
-  const similarRating = dataGenerator.filterProducts(allProducts, {
-    minRating: Math.max(1, product.rating - 0.5),
-    maxRating: Math.min(5, product.rating + 0.5)
-  });
-  
-  // Generate cross-sell products (memory intensive)
-  const crossSellProducts = [];
-  for (let i = 0; i < 20; i++) {
-    const randomIndex = Math.floor(Math.random() * allProducts.length);
-    if (allProducts[randomIndex] && allProducts[randomIndex].id !== product.id) {
-      crossSellProducts.push(allProducts[randomIndex]);
-    }
-  }
-  
-  // Generate upsell products (memory intensive)
-  const upsellProducts = dataGenerator.filterProducts(allProducts, {
-    minPrice: product.price * 1.2,
-    maxPrice: product.price * 2,
-    minRating: product.rating
-  }).slice(0, 10);
-  
-  // Return more data to increase memory usage
+  // Return data for the page
   return {
     props: {
       product: {
@@ -98,29 +70,22 @@ export async function getStaticProps({ params }) {
         stock: product.stock,
         imageUrl: product.imageUrl,
         imageMetadata: processedImage,
-        gallery: gallery.map(g => ({ // Include all gallery data
+        gallery: gallery.map(g => ({
           id: g.id,
           url: g.url,
           width: g.width,
           height: g.height
         })),
-        // Include all reviews to increase data size
-        reviews: product.reviews.map(review => ({
+        reviews: product.reviews.slice(0, 5).map(review => ({
           id: review.id,
           rating: review.rating,
           comment: review.comment,
           date: review.date
         })),
-        // Include all specifications to increase data size
-        specifications: product.specifications,
-        // Include all tags to increase data size
-        tags: product.tags,
-        // Include all related products data
-        relatedProducts: product.relatedProducts.map(rp => ({
-          id: rp.id,
-          name: rp.name,
-          similarity: rp.similarity
-        }))
+        specifications: Object.fromEntries(
+          Object.entries(product.specifications).slice(0, 10)
+        ),
+        tags: product.tags.slice(0, 10)
       },
       relatedProducts: relatedProducts.map(p => ({
         id: p.id,
@@ -129,53 +94,24 @@ export async function getStaticProps({ params }) {
         category: p.category,
         brand: p.brand,
         imageUrl: p.imageUrl,
-        rating: p.rating,
-        stock: p.stock,
-        description: p.description.substring(0, 200)
+        rating: p.rating
       })),
-      categoryProducts: sameCategory.slice(0, 20).map(p => ({
+      categoryProducts: sameCategory.map(p => ({
         id: p.id,
         name: p.name,
         price: p.price,
         brand: p.brand,
         rating: p.rating
       })),
-      brandProducts: sameBrand.slice(0, 20).map(p => ({
+      brandProducts: sameBrand.map(p => ({
         id: p.id,
         name: p.name,
         price: p.price,
         category: p.category,
-        rating: p.rating
-      })),
-      similarPriceProducts: similarPrice.slice(0, 20).map(p => ({
-        id: p.id,
-        name: p.name,
-        price: p.price,
-        category: p.category,
-        brand: p.brand
-      })),
-      similarRatingProducts: similarRating.slice(0, 20).map(p => ({
-        id: p.id,
-        name: p.name,
-        price: p.price,
-        rating: p.rating
-      })),
-      crossSellProducts: crossSellProducts.map(p => ({
-        id: p.id,
-        name: p.name,
-        price: p.price,
-        category: p.category
-      })),
-      upsellProducts: upsellProducts.map(p => ({
-        id: p.id,
-        name: p.name,
-        price: p.price,
         rating: p.rating
       })),
       categoryProductCount: sameCategory.length,
-      brandProductCount: sameBrand.length,
-      similarPriceCount: similarPrice.length,
-      similarRatingCount: similarRating.length
+      brandProductCount: sameBrand.length
     }
   };
 }
@@ -185,14 +121,8 @@ export default function ProductPage({
   relatedProducts, 
   categoryProducts, 
   brandProducts, 
-  similarPriceProducts, 
-  similarRatingProducts,
-  crossSellProducts,
-  upsellProducts,
   categoryProductCount, 
-  brandProductCount, 
-  similarPriceCount,
-  similarRatingCount
+  brandProductCount
 }) {
   const router = useRouter();
   
@@ -220,8 +150,6 @@ export default function ProductPage({
           <p><strong>Brand:</strong> {product.brand} ({brandProductCount} products from this brand)</p>
           <p><strong>Rating:</strong> {product.rating}/5</p>
           <p><strong>Stock:</strong> {product.stock} available</p>
-          <p><strong>Similar price range:</strong> {similarPriceCount} products</p>
-          <p><strong>Similar rating:</strong> {similarRatingCount} products</p>
         </div>
         
         <div>
@@ -279,7 +207,6 @@ export default function ProductPage({
                 <a href={`/products/${relatedProduct.id}`}>
                   {relatedProduct.name} - ${relatedProduct.price.toFixed(2)} ({relatedProduct.category}, {relatedProduct.brand})
                 </a>
-                <p>{relatedProduct.description}</p>
               </li>
             ))}
           </ul>
@@ -305,58 +232,6 @@ export default function ProductPage({
               <li key={p.id}>
                 <a href={`/products/${p.id}`}>
                   {p.name} - ${p.price.toFixed(2)} ({p.category})
-                </a>
-              </li>
-            ))}
-          </ul>
-        </div>
-        
-        <div>
-          <h2>Similar Price Range</h2>
-          <ul>
-            {similarPriceProducts.map(p => (
-              <li key={p.id}>
-                <a href={`/products/${p.id}`}>
-                  {p.name} - ${p.price.toFixed(2)} ({p.category}, {p.brand})
-                </a>
-              </li>
-            ))}
-          </ul>
-        </div>
-        
-        <div>
-          <h2>Similar Rating</h2>
-          <ul>
-            {similarRatingProducts.map(p => (
-              <li key={p.id}>
-                <a href={`/products/${p.id}`}>
-                  {p.name} - ${p.price.toFixed(2)} - Rating: {p.rating}/5
-                </a>
-              </li>
-            ))}
-          </ul>
-        </div>
-        
-        <div>
-          <h2>Customers Also Bought</h2>
-          <ul>
-            {crossSellProducts.map(p => (
-              <li key={p.id}>
-                <a href={`/products/${p.id}`}>
-                  {p.name} - ${p.price.toFixed(2)} ({p.category})
-                </a>
-              </li>
-            ))}
-          </ul>
-        </div>
-        
-        <div>
-          <h2>Premium Alternatives</h2>
-          <ul>
-            {upsellProducts.map(p => (
-              <li key={p.id}>
-                <a href={`/products/${p.id}`}>
-                  {p.name} - ${p.price.toFixed(2)} - Rating: {p.rating}/5
                 </a>
               </li>
             ))}
