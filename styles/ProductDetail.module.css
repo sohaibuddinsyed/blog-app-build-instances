@@ -1,0 +1,289 @@
+.container {
+  min-height: 100vh;
+  padding: 0 0.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.main {
+  padding: 2rem 0;
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: center;
+  width: 100%;
+  max-width: 1200px;
+}
+
+.breadcrumbs {
+  width: 100%;
+  margin-bottom: 2rem;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.breadcrumbs a {
+  color: #0070f3;
+  margin: 0 0.5rem;
+}
+
+.breadcrumbs a:first-child {
+  margin-left: 0;
+}
+
+.productLayout {
+  display: flex;
+  width: 100%;
+  gap: 2rem;
+  margin-bottom: 3rem;
+}
+
+.productGallery {
+  width: 50%;
+}
+
+.mainImage {
+  width: 100%;
+  height: 400px;
+  overflow: hidden;
+  border-radius: 10px;
+  margin-bottom: 1rem;
+}
+
+.mainImage img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.thumbnails {
+  display: flex;
+  gap: 0.5rem;
+  overflow-x: auto;
+  padding-bottom: 0.5rem;
+}
+
+.thumbnail {
+  width: 80px;
+  height: 80px;
+  border-radius: 5px;
+  overflow: hidden;
+  cursor: pointer;
+  border: 2px solid transparent;
+}
+
+.thumbnail.active {
+  border-color: #0070f3;
+}
+
+.thumbnail img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.productInfo {
+  width: 50%;
+}
+
+.productName {
+  margin: 0 0 1rem 0;
+  font-size: 2rem;
+  line-height: 1.3;
+}
+
+.productMeta {
+  margin-bottom: 1.5rem;
+}
+
+.productBrand, .productRating, .productStock {
+  margin: 0.5rem 0;
+  font-size: 1rem;
+  color: #666;
+}
+
+.productPrice {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #0070f3;
+  margin: 1.5rem 0;
+}
+
+.productActions {
+  display: flex;
+  gap: 1rem;
+  margin-bottom: 2rem;
+}
+
+.addToCartButton, .buyNowButton {
+  padding: 0.75rem 1.5rem;
+  font-size: 1rem;
+  font-weight: 500;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.addToCartButton {
+  background-color: #0070f3;
+  color: white;
+  border: none;
+}
+
+.addToCartButton:hover {
+  background-color: #0060df;
+}
+
+.buyNowButton {
+  background-color: #f8f8f8;
+  color: #333;
+  border: 1px solid #ccc;
+}
+
+.buyNowButton:hover {
+  background-color: #e8e8e8;
+}
+
+.productDescription, .productSpecifications {
+  margin-bottom: 2rem;
+}
+
+.productDescription h2, .productSpecifications h2 {
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
+}
+
+.productSpecifications ul {
+  list-style: none;
+  padding: 0;
+}
+
+.productSpecifications li {
+  padding: 0.5rem 0;
+  border-bottom: 1px solid #eaeaea;
+}
+
+.productTabs {
+  width: 100%;
+  margin-bottom: 3rem;
+}
+
+.tabsHeader {
+  display: flex;
+  border-bottom: 1px solid #eaeaea;
+  margin-bottom: 1.5rem;
+}
+
+.tabButton {
+  padding: 1rem 1.5rem;
+  background: none;
+  border: none;
+  font-size: 1rem;
+  font-weight: 500;
+  color: #666;
+  cursor: pointer;
+}
+
+.tabButton.active {
+  color: #0070f3;
+  border-bottom: 2px solid #0070f3;
+}
+
+.tabContent {
+  padding: 1rem 0;
+}
+
+.detailsGrid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+}
+
+.detailItem {
+  padding: 0.5rem;
+  border-bottom: 1px solid #eaeaea;
+}
+
+.recommendations {
+  width: 100%;
+}
+
+.recommendations h2 {
+  font-size: 1.8rem;
+  margin-bottom: 1.5rem;
+}
+
+.recommendationsGrid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  gap: 1.5rem;
+}
+
+.recommendationCard {
+  display: flex;
+  flex-direction: column;
+  padding: 0.75rem;
+  border: 1px solid #eaeaea;
+  border-radius: 8px;
+  transition: transform 0.2s ease;
+}
+
+.recommendationCard:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+}
+
+.recommendationImage {
+  width: 100%;
+  height: 150px;
+  overflow: hidden;
+  border-radius: 5px;
+  margin-bottom: 0.75rem;
+}
+
+.recommendationImage img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.recommendationCard h3 {
+  margin: 0.5rem 0;
+  font-size: 1rem;
+  line-height: 1.3;
+}
+
+.recommendationPrice {
+  font-weight: bold;
+  font-size: 1.1rem;
+  color: #0070f3;
+  margin: 0.5rem 0;
+}
+
+.loading, .error {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 400px;
+  width: 100%;
+  font-size: 1.5rem;
+}
+
+.error {
+  color: #e00;
+}
+
+@media (max-width: 768px) {
+  .productLayout {
+    flex-direction: column;
+  }
+  
+  .productGallery, .productInfo {
+    width: 100%;
+  }
+  
+  .detailsGrid {
+    grid-template-columns: 1fr;
+  }
+}
