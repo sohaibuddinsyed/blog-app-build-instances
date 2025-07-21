@@ -71,7 +71,7 @@ const nextConfig = {
   // Limit concurrent page generation
   staticPageGenerationConcurrency: 4,
   // Optimize output
-  output: 'standalone',
+  output: 'static',
   // Use SWC minifier
   swcMinify: true,
   // Memory management
