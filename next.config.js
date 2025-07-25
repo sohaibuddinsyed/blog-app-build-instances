@@ -68,8 +68,6 @@ const nextConfig = {
       exclude: ['error', 'warn'],
     } : false,
   },
-  // Limit concurrent page generation
-  staticPageGenerationConcurrency: 4,
   // Optimize output
   output: 'export',
   // Use SWC minifier
