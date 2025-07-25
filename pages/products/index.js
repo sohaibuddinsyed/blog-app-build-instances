@@ -245,11 +245,10 @@ export default function Products({ initialProducts, categories, brands }) {
   );
 }
 
-export async function getServerSideProps({ query }) {
+export async function getStaticProps() {
   // Import data generator
   const { 
     generateProducts, 
-    filterProducts, 
     getProductCategories,
     getProductBrands 
   } = require('../../utils/dataGenerator');
@@ -261,22 +260,9 @@ export async function getServerSideProps({ query }) {
   const categories = getProductCategories(allProducts);
   const brands = getProductBrands(allProducts);
   
-  // Apply initial filters from query
-  const filters = {
-    category: query.category || '',
-    brand: query.brand || '',
-    minPrice: query.minPrice ? parseFloat(query.minPrice) : '',
-    maxPrice: query.maxPrice ? parseFloat(query.maxPrice) : '',
-    minRating: query.minRating ? parseFloat(query.minRating) : '',
-    search: query.search || '',
-    sortBy: query.sortBy || 'name'
-  };
-  
-  // Filter products
-  const filteredProducts = filterProducts(allProducts, filters);
-  
-  // Limit to first 50 products for initial load
-  const initialProducts = filteredProducts.slice(0, 50);
+  // For static generation, we'll load all products initially
+  // Filtering will be handled client-side
+  const initialProducts = allProducts.slice(0, 50);
   
   return {
     props: {
